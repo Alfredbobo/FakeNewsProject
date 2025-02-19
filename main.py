@@ -1,5 +1,8 @@
 import re
 import pandas as pd
+import nltk
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
 
 # Load CSV:
 csv = pd.read_csv("https://raw.githubusercontent.com/several27/FakeNewsCorpus/master/news_sample.csv")
@@ -59,20 +62,32 @@ def clean_text(text):
     # 1th place... / spelling mistakes / others
     text = re.sub(r'(?<![A-Za-z])\d+\w*', '<NUM>', text)
     
-    return text
+    return text 
 
-# applying clean_text() function
+# Applying clean_text() and saving new csv using save_csv()
 df2["content"] = df2["content"].apply(clean_text)  
+save_csv(df2, "CLEANED")  # Cleaned data is stored in: 'news_sample_CLEANED.csv', and ready for Tokenization
 
-# saving new csv using save_csv()
-save_csv(df2, "CLEANED")
-
-"""
-Cleaned data is now stored in news_sample_CLEANED.csv, and ready for the Tokenization part
-"""
 
 #########################################################################################################
 # TOKENIZATION
 #########################################################################################################
+"""
+Tokenize the text - split text into words (tokens)
+Remove stopwords - filter out words like 'the', 'is', 'and' etc...
+Compute vocabulary size and reduction rate before and after stopword removal
 
+Apply stemming - Reduce words to root form (e.g: 'running' --> 'run')
+Compute vocabulary size and reduction rate before and after stemming
+"""
+# TOKENS--------------------------------------------------------------------------------------------------
+df3 = pd.read_csv("news_sample_CLEANED.csv")
+tokenizer = RegexpTokenizer(r'<[^>]+>|\w+')       # Defining regex to treat words like <DATE> as a single word
+                                                           
+def tokenize(text):
+    return tokenizer.tokenize(text)
+
+# Applying function and saving tokenized data
+df3["content"] = df3["content"].apply(tokenize)
+save_csv(df3, "Tokenization")
 
