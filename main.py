@@ -3,6 +3,7 @@ import pandas as pd
 import nltk
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+import ast
 
 # Load CSV:
 csv = pd.read_csv("https://raw.githubusercontent.com/several27/FakeNewsCorpus/master/news_sample.csv")
@@ -91,3 +92,23 @@ def tokenize(text):
 df3["content"] = df3["content"].apply(tokenize)
 save_csv(df3, "Tokenization")
 
+
+# STOP-WORD REMOVAL---------------------------------------------------------------------------------------
+df4 = pd.read_csv("news_sample_Tokenization.csv")
+stop_words = set(stopwords.words("english"))              # Set of english stop-words
+
+df4["content"] = df4["content"].apply(ast.literal_eval)   # Converts str(lst) → lst /// "['hej', 'ole']"  →  ['hej', 'ole']
+
+def remove_stopwords(all_tokens):
+    filtered_tokens = []
+    for token in all_tokens:                       # Iterate over each token in df['content']
+        if token not in stop_words:                # If token is NOT in the stop-words set:
+            filtered_tokens.append(token)          #        - append to filtered_tokens
+    return filtered_tokens 
+
+# Apply stop-word removal and save
+df4["content"] = df4["content"].apply(remove_stopwords)    # (!!!) .apply() iterates through all the rows in the CSV
+save_csv(df4, "Stopwords")
+
+
+# STEMMING---------------------------------------------------------------------------------------
