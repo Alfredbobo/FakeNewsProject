@@ -3,6 +3,9 @@ import pandas as pd
 import nltk
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+from nltk.stem.porter import *
+from nltk.stem import *
+
 import ast
 
 # Load CSV:
@@ -71,7 +74,7 @@ save_csv(df2, "CLEANED")  # Cleaned data is stored in: 'news_sample_CLEANED.csv'
 
 
 #########################################################################################################
-# TOKENIZATION
+# TOKENIZATION & STEMMING
 #########################################################################################################
 """
 * Tokenize the text - split text into words (tokens)
@@ -129,11 +132,26 @@ for i in range(len(df4)):                  # Loop through each row in the CSV
     for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
         stopword_removal.add(word) 
 
-print(f"Total words BEFORE stop-word removal: {len(before_stopword_removal)}")
-print(f"Total words AFTER stop-word removal: {len(stopword_removal)}")
+print(f"Total vocabulary BEFORE stop-word removal: {len(before_stopword_removal)}")
+print(f"Total vocabulary AFTER stop-word removal: {len(stopword_removal)}")
 reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal)) * 100
-print(f"Reduction Rate of the vocanulary: {reduction_rate:.2f}%")
+print(f"Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
 
 
 # STEMMING------------------------------------------------------------------------------------------------
+stemmer = PorterStemmer()
+skip_tokens = {"<NUM>", "<DATE>", "<URL>", "<EMAIL>"}
+                  
+for i in range(len(df4)):                           # Iterate through each row in CSV
+    stemmed_tokens = []                             # Empty list to store stemmed tokens
+    for token in df4.loc[i, "content"]:             # Iterate through each token in row ["content"]
+        if token in skip_tokens:                    # SKIP token if <NUM>, <DATE>, etc....
+            stemmed_tokens.append(token)
+        else:
+            stemmed_word = stemmer.stem(token)      # Apply stemming
+            stemmed_tokens.append(stemmed_word)     # Store the stemmed word
+    df4.loc[i, "content"] = str(stemmed_tokens)     # Update with stemmed tokens
+
+# Save csv
+save_csv(df4, "Stemmed")
  
