@@ -111,7 +111,6 @@ before_stopword_removal = set()            #
 for i in range(len(df4)):                  # Loop through each row in the CSV
     for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
         before_stopword_removal.add(word)  
-print(f"Total words BEFORE stop-word removal: {len(before_stopword_removal)}")
 
 # remove stop-words
 def remove_stopwords(all_tokens):
@@ -124,12 +123,17 @@ def remove_stopwords(all_tokens):
 df4["content"] = df4["content"].apply(remove_stopwords)    # (!!!) .apply() iterates through all the rows in the CSV
 save_csv(df4, "Stopwords")
 
-# compute unique words AFTER stop-word removal (16390) 
+# compute unique words AFTER stop-word removal (16390) & reduction rate
 stopword_removal = set()         
 for i in range(len(df4)):                  # Loop through each row in the CSV
     for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
         stopword_removal.add(word) 
+
+print(f"Total words BEFORE stop-word removal: {len(before_stopword_removal)}")
 print(f"Total words AFTER stop-word removal: {len(stopword_removal)}")
+reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal)) * 100
+print(f"Reduction Rate of the vocanulary: {reduction_rate:.2f}%")
 
 
 # STEMMING------------------------------------------------------------------------------------------------
+ 
