@@ -74,12 +74,19 @@ save_csv(df2, "CLEANED")  # Cleaned data is stored in: 'news_sample_CLEANED.csv'
 # TOKENIZATION
 #########################################################################################################
 """
-Tokenize the text - split text into words (tokens)
-Remove stopwords - filter out words like 'the', 'is', 'and' etc...
-Compute vocabulary size and reduction rate before and after stopword removal
+* Tokenize the text - split text into words (tokens)
+* Compute vocabulary BEFORE stop-word removal
+* Remove stopwords - (filter out words like: 'the', 'is', 'and' etc...)
+* Compute vocabulary AFTER stop-word removal
 
 Apply stemming - Reduce words to root form (e.g: 'running' --> 'run')
 Compute vocabulary size and reduction rate before and after stemming
+
+returns:
+vocabulary(BEFORE) = int
+vocabulary(AFTER) = int
+stop-word removal CSV = news_sample_Stopwords.csv
+
 """
 # TOKENS--------------------------------------------------------------------------------------------------
 df3 = pd.read_csv("news_sample_CLEANED.csv")
@@ -93,22 +100,36 @@ df3["content"] = df3["content"].apply(tokenize)
 save_csv(df3, "Tokenization")
 
 
-# STOP-WORD REMOVAL---------------------------------------------------------------------------------------
+# STOP-WORD REMOVAL & COMPUTE-----------------------------------------------------------------------------
 df4 = pd.read_csv("news_sample_Tokenization.csv")
 stop_words = set(stopwords.words("english"))              # Set of english stop-words
 
 df4["content"] = df4["content"].apply(ast.literal_eval)   # Converts str(lst) → lst /// "['hej', 'ole']"  →  ['hej', 'ole']
 
+# compute unique words BEFORE stop-word removal (16522)
+before_stopword_removal = set()            # 
+for i in range(len(df4)):                  # Loop through each row in the CSV
+    for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
+        before_stopword_removal.add(word)  
+print(f"Total words BEFORE stop-word removal: {len(before_stopword_removal)}")
+
+# remove stop-words
 def remove_stopwords(all_tokens):
     filtered_tokens = []
     for token in all_tokens:                       # Iterate over each token in df['content']
         if token not in stop_words:                # If token is NOT in the stop-words set:
             filtered_tokens.append(token)          #        - append to filtered_tokens
     return filtered_tokens 
-
-# Apply stop-word removal and save
+# apply stop-word removal and save
 df4["content"] = df4["content"].apply(remove_stopwords)    # (!!!) .apply() iterates through all the rows in the CSV
 save_csv(df4, "Stopwords")
 
+# compute unique words AFTER stop-word removal (16390) 
+stopword_removal = set()         
+for i in range(len(df4)):                  # Loop through each row in the CSV
+    for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
+        stopword_removal.add(word)  
+print(f"Total words AFTER stop-word removal: {len(stopword_removal)}")
 
-# STEMMING---------------------------------------------------------------------------------------
+
+# STEMMING------------------------------------------------------------------------------------------------
