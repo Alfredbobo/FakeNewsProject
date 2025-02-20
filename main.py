@@ -132,7 +132,7 @@ for i in range(len(df4)):                  # Loop through each row in the CSV
 print(f"Total words BEFORE stop-word removal: {len(before_stopword_removal)}")
 print(f"Total words AFTER stop-word removal: {len(stopword_removal)}")
 reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal)) * 100
-print(f"Reduction Rate of the vocanulary: {reduction_rate:.2f}%")
+print(f"Reduction Rate of the vocanulary: {reduction_rate:.2f}%") 
 
 
 # STEMMING------------------------------------------------------------------------------------------------
