@@ -128,7 +128,7 @@ save_csv(df4, "Stopwords")
 stopword_removal = set()         
 for i in range(len(df4)):                  # Loop through each row in the CSV
     for word in df4.loc[i, "content"]:     # Loop through each word in the row (only in "content")
-        stopword_removal.add(word)  
+        stopword_removal.add(word) 
 print(f"Total words AFTER stop-word removal: {len(stopword_removal)}")
 
 
