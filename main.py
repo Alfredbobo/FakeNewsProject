@@ -135,7 +135,7 @@ for i in range(len(df4)):                  # Loop through each row in the CSV
 print(f"Total vocabulary BEFORE stop-word removal: {len(before_stopword_removal)}")
 print(f"Total vocabulary AFTER stop-word removal: {len(stopword_removal)}")
 reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal)) * 100
-print(f"Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
+print(f"STOP-WORD REMOVAL - Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
 
 
 # STEMMING------------------------------------------------------------------------------------------------
@@ -152,6 +152,19 @@ for i in range(len(df4)):                           # Iterate through each row i
             stemmed_tokens.append(stemmed_word)     # Store the stemmed word
     df4.loc[i, "content"] = str(stemmed_tokens)     # Update with stemmed tokens
 
-# Save csv
+# Save csv & read it
 save_csv(df4, "Stemmed")
- 
+df5 = pd.read_csv("news_sample_Stemmed.csv")
+
+# compute unique words AFTER stemming & reduction rate
+df5["content"] = df5["content"].apply(ast.literal_eval)   # Converts str(lst) → lst /// "['hej', 'ole']"  →  ['hej', 'ole']
+
+unique_stem_words = set()
+for token in df5["content"]:
+    unique_stem_words.update(token)
+
+print(f"Total vocabulary AFTER stemming: {len(unique_stem_words)}")
+reduction_rate = ((len(stopword_removal) - len(unique_stem_words)) / len(stopword_removal)) * 100
+print(f"STEMMING - Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
+
+#--------------------------------------------------------------------------------------------------------
