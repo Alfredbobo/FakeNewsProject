@@ -134,21 +134,22 @@ def remove_stopwords(df):
     for i in range(len(df)):         
         for word in df.loc[i, "content"]:   
             stopword_removal.add(word) 
-    reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal))
+
+    reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal)) * 100
 
 
     # PRINT STATEMENTS
     print(f"Total vocabulary BEFORE stop-word removal: {len(before_stopword_removal)}")
     print(f"Total vocabulary AFTER stop-word removal: {len(stopword_removal)}")
-    print(f"STOP-WORD REMOVAL - Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
+    print(f"Reduction Rate AFTER stop-word removal: {reduction_rate:.2f}%")
 
-    return df
+    return df, stopword_removal
 
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Stemming
 # ----------------------------------------------------------------------------------------------------------
-def stemming(df):
+def stemming(df, stopword_removal):
     stemmer = PorterStemmer()
     skip_tokens = {"<NUM>", "<DATE>", "<URL>", "<EMAIL>"}
 
@@ -174,9 +175,11 @@ def stemming(df):
     for token in df["content"]:
         unique_stem_words.update(token)
 
+    reduction_rate = ((len(stopword_removal) - len(unique_stem_words)) / len(stopword_removal)) * 100
 
     # PRINT STATEMENTS
     print(f"Total vocabulary AFTER stemming: {len(unique_stem_words)}")
+    print(f"Reduction Rate AFTER stemming): {reduction_rate:.2f}%")
 
     return df
 
@@ -210,10 +213,10 @@ def full_cleaning(csv_file, name):
     df = tokenize(df)
 
     #5) Stop-word removal
-    df = remove_stopwords(df)
+    df, stopword_removal = remove_stopwords(df)
 
     #6) Stemming
-    df = stemming(df)
+    df = stemming(df, stopword_removal)
 
     #7) Save cleaned csv
     df.to_csv(name, index=False)
