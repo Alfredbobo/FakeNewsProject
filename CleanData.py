@@ -110,6 +110,13 @@ def remove_stopwords(df):
     else:
         pass
 
+    # COMPUTATION (before stop-word removal)
+    before_stopword_removal = set()            
+    for i in range(len(df)):                         # Loop through each row in the CSV
+        for word in df.loc[i, "content"]:            # Loop through each word in the row (only in "content")
+            before_stopword_removal.add(word)  
+
+
     # Remove stop-words
     def remove_stopwords(all_tokens):
         filtered_tokens = []
@@ -120,6 +127,20 @@ def remove_stopwords(df):
 
     # apply stop-word removal
     df["content"] = df["content"].apply(remove_stopwords)  
+
+
+    # COMPUTATION (after stop-word removal)
+    stopword_removal = set()         
+    for i in range(len(df)):         
+        for word in df.loc[i, "content"]:   
+            stopword_removal.add(word) 
+    reduction_rate = ((len(before_stopword_removal) - len(stopword_removal)) / len(before_stopword_removal))
+
+
+    # PRINT STATEMENTS
+    print(f"Total vocabulary BEFORE stop-word removal: {len(before_stopword_removal)}")
+    print(f"Total vocabulary AFTER stop-word removal: {len(stopword_removal)}")
+    print(f"STOP-WORD REMOVAL - Reduction Rate of the vocabulary: {reduction_rate:.2f}%")
 
     return df
 
@@ -146,6 +167,16 @@ def stemming(df):
         df["content"] = df["content"].apply(ast.literal_eval)
     else:
         pass
+
+
+    # COMPUTATION (after stemming)
+    unique_stem_words = set()
+    for token in df["content"]:
+        unique_stem_words.update(token)
+
+
+    # PRINT STATEMENTS
+    print(f"Total vocabulary AFTER stemming: {len(unique_stem_words)}")
 
     return df
 
