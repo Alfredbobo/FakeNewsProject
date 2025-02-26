@@ -219,7 +219,8 @@ def full_cleaning(csv_file, name):
     df = stemming(df, stopword_removal)
 
     #7) Save cleaned csv
-    df.to_csv(name, index=False)
+    folder = "FakeNewsCorpus_chunks/"     # cleaned_csv to this folder - (change it if you want to save somewhere else)
+    df.to_csv(folder + name, index=False)
     print(f"Saved: {name}")
 
     return df
