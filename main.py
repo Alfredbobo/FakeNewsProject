@@ -44,7 +44,7 @@ df["content"] = df["content"].str.replace(r'\s+', ' ', regex=True)              
 save_csv(df, "first_cleaning")
 
 """
-PART 2) 
+PART 2)
 """
 # Second part of the cleaning. Cleaning the new CSV file "news_sample_first_cleaning.csv" and naming it df2.
 df2 = pd.read_csv("news_sample_first_cleaning.csv")
