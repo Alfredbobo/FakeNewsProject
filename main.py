@@ -2,9 +2,14 @@ from CleanData import *
 from Model import *
 
 #-----------------------------------------------------------------------------------------------------------------
+# RENAME COLUMNS OF BBC_ARTICLES
+#-----------------------------------------------------------------------------------------------------------------
+#rename_columns("bbc_articles_scraped.csv", "scraped_articles.csv")
+
+#-----------------------------------------------------------------------------------------------------------------
 # RUN 'FULL_CLEANING' ON A CSV FILE
 #-----------------------------------------------------------------------------------------------------------------
-#full_cleaning("news_sample.csv", "TEST.csv")
+#full_cleaning("scraped_articles.csv", "scraped_articles.csv")
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'GROUP_TYPES' for binary classification
@@ -20,5 +25,5 @@ from Model import *
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model WITH METADATA (url)
 #-----------------------------------------------------------------------------------------------------------------
-X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
+#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
+#train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
