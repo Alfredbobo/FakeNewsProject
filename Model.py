@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score, f1_score
+from sklearn.preprocessing import OneHotEncoder
+from scipy.sparse import hstack
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Grouping Types (['types'] --> reliable or fake)
@@ -58,7 +60,9 @@ def split_data(csv):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
+# ----------------------------------------------------------------------------------------------------------
+# *) TRAIN MODEL
+# ----------------------------------------------------------------------------------------------------------
 def train_model(X_train, X_val, X_test, y_train, y_val, y_test):
     # VECTORIZE 10000 most frequent words
     vectorizer = CountVectorizer(max_features=10000)    # CountVectorizer turns text into vectors of word counts
@@ -72,6 +76,72 @@ def train_model(X_train, X_val, X_test, y_train, y_val, y_test):
 
     # EVALUATE ON TEST-SET
     y_pred = model.predict(X_test_vec)
+
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred))
+
+    f1 = f1_score(y_test, y_pred, pos_label="fake")
+    print("F1 Score (fake):", round(f1, 3))
+
+    acc = accuracy_score(y_test, y_pred)
+    print("Accuracy:", round(acc, 3))
+
+
+
+# ----------------------------------------------------------------------------------------------------------
+# *) SPLIT & TRAIN (including MetaData ['domain'])
+# ----------------------------------------------------------------------------------------------------------
+def split_with_meta(csv):
+    df = pd.read_csv(csv)
+    df = df.dropna(subset=["content", "type", "domain"])
+
+    X = df[["content", "domain"]]
+    y = df["type"]
+
+    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
+
+    print(f"X_train: {X_train.shape}, X_val: {X_val.shape}, X_test: {X_test.shape}")
+    print(f"y_train: {y_train.shape}, y_val: {y_val.shape}, y_test: {y_test.shape}")
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test):
+    # Extract columns
+    X_train_text = X_train["content"]
+    X_train_domain = X_train["domain"]
+
+    X_val_text = X_val["content"]
+    X_val_domain = X_val["domain"]
+
+    X_test_text = X_test["content"]
+    X_test_domain = X_test["domain"]
+
+    # VECTORIZE
+    vectorizer = CountVectorizer(max_features=10000)
+    X_train_text_vec = vectorizer.fit_transform(X_train_text)
+    X_val_text_vec = vectorizer.transform(X_val_text)
+    X_test_text_vec = vectorizer.transform(X_test_text)
+
+    # Encode Domain using OneHotEncoding
+    domain_encoder = OneHotEncoder(handle_unknown='ignore')
+    X_train_domain_vec = domain_encoder.fit_transform(X_train_domain.values.reshape(-1, 1))
+    X_val_domain_vec = domain_encoder.transform(X_val_domain.values.reshape(-1, 1))
+    X_test_domain_vec = domain_encoder.transform(X_test_domain.values.reshape(-1, 1))
+
+    # Combine [content] and [domain] using hstack (creates a matrix)
+    # hstack = Joins word-vectors and domain vectors side-by-side
+    X_train_combined = hstack([X_train_text_vec, X_train_domain_vec])
+    X_val_combined = hstack([X_val_text_vec, X_val_domain_vec])
+    X_test_combined = hstack([X_test_text_vec, X_test_domain_vec])
+
+    # Train model
+    model = LogisticRegression(max_iter=1000, C=1.0)
+    model.fit(X_train_combined, y_train)
+
+    # 6. Evaluate
+    y_pred = model.predict(X_test_combined)
 
     print("Classification Report:")
     print(classification_report(y_test, y_pred))

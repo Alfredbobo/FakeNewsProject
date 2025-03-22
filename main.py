@@ -12,7 +12,13 @@ from Model import *
 #group_types("merged_cleaned.csv", "updated")
 
 #-----------------------------------------------------------------------------------------------------------------
-# RUN 'SPLIT_DATA' (default: 80% / 10% / 10%) & Train Model!
+# RUN 'SPLIT_DATA' & Train Model
 #-----------------------------------------------------------------------------------------------------------------
-X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
-train_model(X_train, X_val, X_test, y_train, y_val, y_test)
+#X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
+#train_model(X_train, X_val, X_test, y_train, y_val, y_test)
+
+#-----------------------------------------------------------------------------------------------------------------
+# RUN 'SPLIT_DATA' & Train Model WITH METADATA (url)
+#-----------------------------------------------------------------------------------------------------------------
+X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
+train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
