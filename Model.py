@@ -2,6 +2,36 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
+# ----------------------------------------------------------------------------------------------------------
+# *) Grouping Types (['types'] --> reliable or fake)
+# ----------------------------------------------------------------------------------------------------------
+"""
+input: CSV with multiple types under ['type'] & name of the new updated CSV
+returns: CSV with only 2 types of ['type'] = ['reliable'] or ['fake']
+"""
+def group_types(csv, name):
+    df = pd.read_csv(csv)
+    fake_types = ['conspiracy', 'unreliable', 'junksci', 'clickbait']
+    rows_to_drop = []
+
+    # Iterate over rows and update the ['type'] column:
+    for index, row in df.iterrows():
+        current = str(row['type']).strip()
+        if current == 'fake' or current == 'reliable':
+            continue
+        elif current in fake_types:
+            df.loc[index, 'type'] = 'fake'
+        else:
+            rows_to_drop.append(index) 
+    # Remove all other rows that isn't [reliable] or in 'fake_types'
+    df.drop(index = rows_to_drop, inplace=True)
+
+    # Save & print head
+    print("First 20 rows of ['type']: ")
+    print(df["type"].head(20))
+    df.to_csv(f"{name}.csv", index=False)
+    return df
+
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Split Data (default: 80% / 10% / 10%)
