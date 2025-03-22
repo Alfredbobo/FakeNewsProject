@@ -7,6 +7,24 @@ from nltk.stem.porter import PorterStemmer
 import ast
 
 # ----------------------------------------------------------------------------------------------------------
+# *) Helper function to change column names in "bbc_articles_scraped"
+# ----------------------------------------------------------------------------------------------------------
+def rename_columns(input_csv, output_csv):
+    """
+    Renames 'text' → 'content' and 'url' → 'domain' in given CSV,
+    output: new CSV file
+    """
+    df = pd.read_csv(input_csv)
+
+    # Rename columns if they exist
+    df.rename(columns={"text": "content", "url": "domain"}, inplace=True)
+
+    # Save updated DataFrame
+    df.to_csv(output_csv, index=False)
+
+    print(f"Renamed columns and saved to '{output_csv}'")
+
+# ----------------------------------------------------------------------------------------------------------
 # *) Helper function to save a CSV
 # ----------------------------------------------------------------------------------------------------------
 def save_csv(df, name):
