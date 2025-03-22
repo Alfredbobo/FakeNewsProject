@@ -12,6 +12,7 @@ from Model import *
 #group_types("merged_cleaned.csv", "updated")
 
 #-----------------------------------------------------------------------------------------------------------------
-# RUN 'SPLIT_DATA' (default: 80% / 10% / 10%)
+# RUN 'SPLIT_DATA' (default: 80% / 10% / 10%) & Train Model!
 #-----------------------------------------------------------------------------------------------------------------
-split_data("updated.csv")
+X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
+train_model(X_train, X_val, X_test, y_train, y_val, y_test)

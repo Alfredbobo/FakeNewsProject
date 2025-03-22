@@ -1,6 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split                         
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, accuracy_score, f1_score
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Grouping Types (['types'] --> reliable or fake)
@@ -54,3 +57,27 @@ def split_data(csv):
     print(f"y_train: {y_train.shape}, y_val: {y_val.shape}, y_test: {y_test.shape}")
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def train_model(X_train, X_val, X_test, y_train, y_val, y_test):
+    # VECTORIZE 10000 most frequent words
+    vectorizer = CountVectorizer(max_features=10000)    # CountVectorizer turns text into vectors of word counts
+    X_train_vec = vectorizer.fit_transform(X_train)     # Vectorize the X_train, X_val & X_test
+    X_val_vec = vectorizer.transform(X_val)
+    X_test_vec = vectorizer.transform(X_test)
+
+    # TRAIN MODEL (Logistic-Regression)
+    model = LogisticRegression(max_iter=1000, C=1.0)   # C, can be tweaked
+    model.fit(X_train_vec, y_train)                    # (small C = less overfitting, big C = risk of overfitting)
+
+    # EVALUATE ON TEST-SET
+    y_pred = model.predict(X_test_vec)
+
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred))
+
+    f1 = f1_score(y_test, y_pred, pos_label="fake")
+    print("F1 Score (fake):", round(f1, 3))
+
+    acc = accuracy_score(y_test, y_pred)
+    print("Accuracy:", round(acc, 3))
