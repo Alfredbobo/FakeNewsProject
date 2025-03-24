@@ -90,8 +90,8 @@ from embedding import *
 
 ############################################################################################################################
 # Step 1: Train model on FakeNewsCorpus
-X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-pipeline = train_final_mlp_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
+X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated_with_bbc.csv")
+ipeline = train_final_mlp_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
 
 # Step 2: Load LIAR test set
 liar_df = load_liar_test("test.tsv")
