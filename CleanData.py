@@ -5,6 +5,9 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 import ast
+from urllib.parse import urlparse
+from Model import group_types
+from embedding import *
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Helper function to change column names in "bbc_articles_scraped"
@@ -30,6 +33,37 @@ def rename_columns(input_csv, output_csv):
 def save_csv(df, name):
     df.to_csv(f"{name}", index=False)
     print(f"Saved: {name}")
+
+# ----------------------------------------------------------------------------------------------------------
+# *) Helper function to find the domain and change it from bbc.com/.../... to bbc.com.
+# ----------------------------------------------------------------------------------------------------------
+
+def extract_domain(url):
+    try:
+        return urlparse(str(url)).netloc.lower().replace("www.", "")
+    except:
+        return str(url).lower().replace("www.", "")
+    
+# ----------------------------------------------------------------------------------------------------------
+# *) Helper function combine the FakeNewsCorpus with the BBC articles
+# ----------------------------------------------------------------------------------------------------------
+def prepare_combined_dataset(original_csv, bbc_csv, cleaned_csv_name):
+
+    # Step 1: Clean original dataset
+    group_types(original_csv, "updated_cleaned")
+    original_df = pd.read_csv("updated_cleaned.csv")
+
+    # Step 2: Load and fix BBC dataset
+    bbc_df = pd.read_csv(bbc_csv)
+    bbc_df["type"] = "reliable"
+    bbc_df["domain"] = bbc_df["domain"].apply(extract_domain)
+
+    # Step 3: Combine & save
+    combined_df = pd.concat([original_df, bbc_df], ignore_index=True)
+    combined_df.to_csv(cleaned_csv_name, index=False)
+
+    print(f"Combined dataset saved as: {cleaned_csv_name}")
+    return combined_df
 
 
 # ----------------------------------------------------------------------------------------------------------
@@ -247,3 +281,40 @@ def full_cleaning(csv_file, name):
 
 # Test run
 # full_cleaning("news_sample.csv", "TEST.csv")
+
+
+
+# ----------------------------------------------------------------------------------------------------------
+# *) LOAD, CHANGE AND CLEAN THE LIAR DATA-SET
+# ----------------------------------------------------------------------------------------------------------
+
+def load_liar_test(file_path="test.tsv"):
+
+    # Load the LIAR test set
+    df = pd.read_csv(file_path, sep="\t", header=None)
+    df.columns = [
+        "id", "label", "statement", "subject", "speaker", "job_title", "state", "party",
+        "barely_true", "false", "half_true", "mostly_true", "pants_fire", "context"
+    ]
+
+    # Keep only fake vs reliable labels
+    label_map = {
+        "true": "reliable",
+        "mostly-true": "reliable",
+        "false": "fake",
+        "pants-fire": "fake",
+        "barely-true": "fake"
+    }
+
+    df = df[df["label"].isin(label_map)]
+    df["type"] = df["label"].map(label_map)
+
+    df_test = df[["statement", "type"]] 
+    df_test = df_test.rename(columns={"statement": "content"})
+    df_test.to_csv("liar_test.csv", index=False)
+
+    full_cleaning("liar_test.csv", "liar_test_cleaned.csv")
+
+    df_liar_cleaned = pd.read_csv("FakeNewsCorpus_chunks/liar_test_cleaned.csv")
+
+    return df_liar_cleaned
