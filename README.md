@@ -1,16 +1,20 @@
-# FakeNewsProject
-Group: ML BOLD *(Alfred, Jon, August, Nikolai)*
+# 📰 FakeNewsProject  
+**Group: ML BOLD** *(Alfred, Jon, August, Nikolai)*
 
 ---
 
-### HOW TO RUN:
+## 🚀 HOW TO RUN:
 
-1. **Download the project** and open a terminal in the folder.
-2. **Download "Dataset"** from the feature and add the file **"updated.csv"** and **"test.tsv"** to the project folder. If you want to try to clean the data yourself Download the original [995,000_rows.csv](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
-3. **Activate your Python environment** if needed.
-4. To run operations or evaluations, open `main.py` and set the corresponding model flags (e.g. `RUN_SIMPLE_MODEL = True`).
-5. Only **one flag should be set to `True` at a time** due to dataset splitting.
-6. Run the script with:
+1.  **Download the project** and open a terminal in the project folder.
+2.  **Download the dataset files**:  
+   - Add both `updated.csv` and `test.tsv` to the root of the project.  
+   - *Want to preprocess it yourself?* Download the original  
+     👉 [`995,000_rows.csv`](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
+3.   Activate your Python environment (if needed).
+4.  Open `main.py` and set the model you want to run by changing its flag to `True`  
+   _(e.g. `RUN_SIMPLE_MODEL = True`)_
+5. ⚠️ **Only one flag should be `True` at a time** due to dataset splitting!
+6. ▶️ Run the script:
 
 ---
 
