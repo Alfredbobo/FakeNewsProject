@@ -1,7 +1,6 @@
 from CleanData import *
 from Model import *
 import os
-import gc
 
 # =========================================================================================
 # MODEL SELECTION CONFIGURATION

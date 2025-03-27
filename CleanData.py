@@ -357,6 +357,6 @@ def load_liar_file(file_path="test.tsv"):
     df_clean.to_csv(raw_csv, index=False)
     full_cleaning_liar(raw_csv, cleaned_csv)
 
-    # 🛠 Fix: Read from correct folder
+    #  Read from correct folder
     return pd.read_csv("operation_csv_files/" + cleaned_csv)
 
