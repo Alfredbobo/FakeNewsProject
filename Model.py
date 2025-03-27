@@ -238,8 +238,8 @@ def train_with_meta_and_extra_data(X_train, X_val, X_test, y_train, y_val, y_tes
 def train_final_svm_tfidf(X_train, X_val, X_test, y_train, y_val, y_test):
     # Build pipeline with best parameters
     pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(ngram_range=(1,2), max_features=100)),
-        ("clf", LinearSVC(C=1, loss="squared_hinge", dual=True, max_iter=100))
+        ("tfidf", TfidfVectorizer(ngram_range=(1,2), max_features=20000)),
+        ("clf", LinearSVC(C=1, loss="squared_hinge", dual=True, max_iter=10000))
     ])
 
     # Fit on the full training data

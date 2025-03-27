@@ -351,10 +351,12 @@ def load_liar_file(file_path="test.tsv"):
 
     # Add the correct directory
     base_name = os.path.splitext(os.path.basename(file_path))[0]
-    raw_csv = f"operation_csv_files/liar_{base_name}.csv"
-    cleaned_csv = f"operation_csv_files/liar_{base_name}_cleaned.csv"
+    raw_csv = f"liar_{base_name}.csv"
+    cleaned_csv = f"liar_{base_name}_cleaned.csv"
 
     df_clean.to_csv(raw_csv, index=False)
-    full_cleaning(raw_csv, cleaned_csv)
+    full_cleaning_liar(raw_csv, cleaned_csv)
 
-    return pd.read_csv(cleaned_csv)
+    # 🛠 Fix: Read from correct folder
+    return pd.read_csv("operation_csv_files/" + cleaned_csv)
+
