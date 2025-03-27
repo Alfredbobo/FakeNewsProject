@@ -20,7 +20,7 @@ RUN_SIMPLE_MODEL_WITH_METADATA = False
 COMBINE_FAKENEWSCORPUS_WITH_BBC = False
 
 # Simple model + metadata + BBC articles
-RUN_SIMPLE_MODEL_WITH_METADATA_AND_BBC = True
+RUN_SIMPLE_MODEL_WITH_METADATA_AND_BBC = False
 
 # Simple model evaluated on LIAR dataset (No metadata)
 RUN_SIMPLE_MODEL_AND_EVALUATE_ON_LIAR = False
