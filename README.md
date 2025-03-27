@@ -12,8 +12,7 @@
      👉 [`995,000_rows.csv`](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
 3.   Activate your Python environment (if needed).
 4.  Open `main.py` and set the model you want to run by changing its flag to `True`  
-   _(e.g. `RUN_SIMPLE_MODEL = True`)_
-5. ⚠️ **Only one flag should be `True` at a time** due to dataset splitting!
+   _(e.g. `RUN_SIMPLE_MODEL = True`)_ ⚠️ **Only one flag should be `True` at a time** due to dataset splitting!
 6. ▶️ Run the script:
 
 ---
