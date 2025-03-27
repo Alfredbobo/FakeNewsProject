@@ -1,6 +1,6 @@
 from CleanData import *
 from Model import *
-from embedding import *
+import os
 
 #-----------------------------------------------------------------------------------------------------------------
 # RENAME COLUMNS OF BBC_ARTICLES
@@ -10,23 +10,23 @@ from embedding import *
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'FULL_CLEANING' ON A CSV FILE
 #-----------------------------------------------------------------------------------------------------------------
-#full_cleaning("scraped_articles.csv", "scraped_articles.csv")
+#full_cleaning("updated_with_CB_P.csv", "updated_with_CB_P_clean.csv")
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'GROUP_TYPES' for binary classification
 #-----------------------------------------------------------------------------------------------------------------
-#group_types("merged_cleaned.csv", "updated")
+##group_types("updated_with_CB_P_clean.csv", "updated_with_CB_P")
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model
 #-----------------------------------------------------------------------------------------------------------------
-#X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
+#X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated_with_CB_P.csv")
 #train_model(X_train, X_val, X_test, y_train, y_val, y_test)
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model WITH METADATA (url)
 #-----------------------------------------------------------------------------------------------------------------
-#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
+#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated_with_CB_P.csv")
 #train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
 
 #-----------------------------------------------------------------------------------------------------------------
@@ -34,77 +34,26 @@ from embedding import *
 #-----------------------------------------------------------------------------------------------------------------
 
 #combined_df = prepare_combined_dataset("updated.csv", "scraped_articles.csv", "updated_with_bbc.csv")
-
-#print(combined_df[combined_df["type"] == "reliable"]["domain"].value_counts().head(10))
-#print(combined_df[combined_df["type"] == "fake"]["domain"].value_counts().head(10))
-#count_bbc = combined_df[combined_df["type"] == "reliable"]["domain"].value_counts().get("bbc.com", 0)
-#print(f"Number of reliable articles from bbc.com: {count_bbc}")
 #X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
 #train_with_meta_and_extra_data(X_train, X_val, X_test, y_train, y_val, y_test)
-#overlap = set(X_train["content"]) & set(X_test["content"])
-#print("Overlap:", len(overlap))
-#train_svm_with_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
 
-#model, vectorizer = train_final_svm_tfidf(X_train["content"], X_val["content"], X_test["content"], y_train, y_val, y_test)
+#-----------------------------------------------------------------------------------------------------------------
+# RUN 'SPLIT_DATA' & Train Model SIMPLE MODEL & EVALUATE ON LIAR DATASET
+#-----------------------------------------------------------------------------------------------------------------
 
-
-#bbc_df = pd.read_csv("scraped_articles.csv")
-#bbc_df = bbc_df.dropna(subset=["content"])
-
-# Transform with the same TF-IDF vectorizer
-#bbc_vec = vectorizer.transform(bbc_df["content"])
-
-# Predict
-#bbc_preds = model.predict(bbc_vec)
-#bbc_df["model_prediction"] = bbc_preds
-
-# Count predictions
-#print(bbc_df["model_prediction"].value_counts())
-
-# Save if needed
-#bbc_df.to_csv("bbc_articles_with_predictions.csv", index=False)
+#X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated_with_CB_P_clean.csv")
+#model, vectorizer = train_model(X_train, X_val, X_test, y_train, y_val, y_test)
+#liar_df = load_liar_file("train.tsv")
+#evaluate_model_on_liar_simple(model, vectorizer, liar_df)
 
 
-#TEST FOR BEST PARAMETERS
+#-----------------------------------------------------------------------------------------------------------------
+# RUN 'SPLIT_DATA' & Train Model ADVANCED MODEL & EVALUATE ON LIAR DATASET
+#-----------------------------------------------------------------------------------------------------------------
 
-#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated_with_bbc.csv")
-
-#best_model = train_svm_with_gridsearch(X_train, X_val, X_test, y_train, y_val, y_test)
-
-
-#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-# Train the final model
-#pipeline = train_final_svm_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
-
-# Load and clean the BBC articles
-#bbc_df = pd.read_csv("scraped_articles.csv")
-#bbc_df = bbc_df.dropna(subset=["content"])
-
-# Use pipeline directly to predict
-#bbc_preds = pipeline.predict(bbc_df["content"])
-#bbc_df["model_prediction"] = bbc_preds
-
-# Show and/or save results
-#print(bbc_df["model_prediction"].value_counts())
-#bbc_df.to_csv("bbc_articles_with_predictions.csv", index=False)
-
-############################################################################################################################
-# Step 1: Train model on FakeNewsCorpus
-X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated_with_bbc.csv")
-ipeline = train_final_mlp_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
-
-# Step 2: Load LIAR test set
-liar_df = load_liar_test("test.tsv")
-
-# Step 3: Evaluate on LIAR
+X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated_with_CB_P_clean.csv")
+pipeline = train_final_svm_tfidf(X_train, X_val, X_test, y_train, y_val, y_test)
+liar_df = load_liar_file("train.tsv")
 evaluate_model_on_liar(pipeline, liar_df)
 
 
-#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-#model, embeddings_index = train_final_mlp_glove(X_train, X_val, X_test, y_train, y_val, y_test)
-
-# Step 2: Load LIAR test set
-#liar_df = load_liar_test("test.tsv")
-
-# Step 3: Evaluate on LIAR
-#evaluate_model_on_liar(model, liar_df, embeddings_index)

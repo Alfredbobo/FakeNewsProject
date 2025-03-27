@@ -11,9 +11,10 @@ from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.sparse import hstack
-from embedding import *
 import numpy as np
+import os
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Grouping Types (['types'] --> reliable or fake)
@@ -24,7 +25,8 @@ returns: CSV with only 2 types of ['type'] = ['reliable'] or ['fake']
 """
 def group_types(csv, name):
     df = pd.read_csv(csv)
-    fake_types = ['conspiracy', 'unreliable', 'junksci', 'clickbait']
+    fake_types = ['conspiracy', 'unreliable', 'junksci', 'clickbait', 'hate']
+    reliable_types = ['political']
     rows_to_drop = []
 
     # Iterate over rows and update the ['type'] column:
@@ -34,6 +36,8 @@ def group_types(csv, name):
             continue
         elif current in fake_types:
             df.loc[index, 'type'] = 'fake'
+        elif current in reliable_types:
+            df.loc[index, 'type'] = 'reliable'
         else:
             rows_to_drop.append(index) 
     # Remove all other rows that isn't [reliable] or in 'fake_types'
@@ -76,18 +80,19 @@ def split_data(csv):
 # ----------------------------------------------------------------------------------------------------------
 def train_model(X_train, X_val, X_test, y_train, y_val, y_test):
     # VECTORIZE 10000 most frequent words
-    vectorizer = CountVectorizer(max_features=10000)    # CountVectorizer turns text into vectors of word counts
-    X_train_vec = vectorizer.fit_transform(X_train)     # Vectorize the X_train, X_val & X_test
+    vectorizer = CountVectorizer(max_features=10000)
+    X_train_vec = vectorizer.fit_transform(X_train)
     X_val_vec = vectorizer.transform(X_val)
     X_test_vec = vectorizer.transform(X_test)
 
-    # TRAIN MODEL (Logistic-Regression)
-    model = LogisticRegression(max_iter=1000, C=1.0)   # C, can be tweaked
-    model.fit(X_train_vec, y_train)                    # (small C = less overfitting, big C = risk of overfitting)
+    # TRAIN MODEL (Logistic Regression)
+    model = LogisticRegression(max_iter=1000, C=1.0)
+    model.fit(X_train_vec, y_train)
 
     # EVALUATE ON TEST-SET
     y_pred = model.predict(X_test_vec)
 
+    # Print report
     print("Classification Report:")
     print(classification_report(y_test, y_pred))
 
@@ -96,6 +101,12 @@ def train_model(X_train, X_val, X_test, y_train, y_val, y_test):
 
     acc = accuracy_score(y_test, y_pred)
     print("Accuracy:", round(acc, 3))
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, y_pred, labels=["fake", "reliable"])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["fake", "reliable"])
+    disp.plot()
+    plt.savefig("confusion_matrix_simple_model.png", dpi=300, bbox_inches="tight")
 
     return model, vectorizer
 
@@ -223,119 +234,26 @@ def train_with_meta_and_extra_data(X_train, X_val, X_test, y_train, y_val, y_tes
     acc = accuracy_score(y_test, y_pred)
     print("Accuracy:", round(acc, 3))
 
-def train_advanced_model_tfidf_naive_bayes(X_train, X_val, X_test, y_train, y_val, y_test):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.naive_bayes import MultinomialNB
-    from sklearn.metrics import classification_report, accuracy_score, f1_score
-
-    # Extract content only (no domain used)
-    X_train_text = X_train["content"]
-    X_val_text = X_val["content"]
-    X_test_text = X_test["content"]
-
-    # TF-IDF Vectorization
-    vectorizer = TfidfVectorizer(max_features=10000)
-    X_train_vec = vectorizer.fit_transform(X_train_text)
-    X_val_vec = vectorizer.transform(X_val_text)
-    X_test_vec = vectorizer.transform(X_test_text)
-
-    # Train Naive Bayes
-    model = MultinomialNB()
-    model.fit(X_train_vec, y_train)
-
-    # Predict and evaluate
-    y_pred = model.predict(X_test_vec)
-
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    f1 = f1_score(y_test, y_pred, pos_label="fake")
-    print("F1 Score (fake):", round(f1, 3))
-
-    acc = accuracy_score(y_test, y_pred)
-    print("Accuracy:", round(acc, 3))
-
-
-def train_svm_with_tfidf(X_train, X_val, X_test, y_train, y_val, y_test):
-    # Use TF-IDF instead of CountVectorizer
-    vectorizer = TfidfVectorizer(max_features=20000)
-    X_train_vec = vectorizer.fit_transform(X_train["content"])
-    X_val_vec = vectorizer.transform(X_val["content"])
-    X_test_vec = vectorizer.transform(X_test["content"])
-
-    # Train an SVM model
-    model = LinearSVC(max_iter=10000)
-    model.fit(X_train_vec, y_train)
-
-    # Predict and evaluate
-    y_pred = model.predict(X_test_vec)
-
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    f1 = f1_score(y_test, y_pred, pos_label="fake")
-    print("F1 Score (fake):", round(f1, 3))
-
-    acc = accuracy_score(y_test, y_pred)
-    print("Accuracy:", round(acc, 3))
-   
-    return model, vectorizer
-
-
-def train_svm_with_gridsearch(X_train, X_val, X_test, y_train, y_val, y_test):
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer()),
-        ('clf', LinearSVC(max_iter=10000))
-    ])
-
-    param_grid = {
-        'tfidf__max_features': [10000, 20000],
-        'tfidf__ngram_range': [(1, 1), (1, 2)],
-        'tfidf__stop_words': [None, 'english'],
-        'clf__C': [0.1, 1, 10]
-    }
-
-    grid = GridSearchCV(pipeline, param_grid, cv=3, scoring='f1_macro', n_jobs=-1, verbose=2)
-    X_small = X_train["content"][:10000]  # or [:5000] for even faster
-    y_small = y_train[:10000]
-
-    grid.fit(X_small, y_small)  
-
-    print("\nBest Parameters:", grid.best_params_)
-    print("Best CV Score (f1_macro):", round(grid.best_score_, 4))
-
-    # Evaluate on test set
-    y_pred = grid.predict(X_test["content"])
-
-    print("\nClassification Report:")
-    print(classification_report(y_test, y_pred))
-
-    f1 = f1_score(y_test, y_pred, pos_label="fake")
-    print("F1 Score (fake):", round(f1, 3))
-
-    acc = accuracy_score(y_test, y_pred)
-    print("Accuracy:", round(acc, 3))
-
-    return grid.best_estimator_  
-
 
 def train_final_svm_tfidf(X_train, X_val, X_test, y_train, y_val, y_test):
     # Build pipeline with best parameters
     pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            max_features=20000,
-            ngram_range=(1, 2),
-            stop_words=None
-        )),
-        ("clf", LinearSVC(C=1, max_iter=10000))
+        ("tfidf", TfidfVectorizer(ngram_range=(1,2), max_features=100)),
+        ("clf", LinearSVC(C=1, loss="squared_hinge", dual=True, max_iter=100))
     ])
 
     # Fit on the full training data
-    pipeline.fit(X_train["content"], y_train)
+    pipeline.fit(X_train, y_train)
 
     # Evaluate on test set
-    y_pred = pipeline.predict(X_test["content"])
+    y_pred = pipeline.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred, labels=["fake", "reliable"])
 
+    # Display it
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["fake", "reliable"])
+    disp.plot()
+    plt.savefig("confusion_matrix_SVM.png", dpi=300, bbox_inches="tight")
+    
     print("Classification Report:")
     print(classification_report(y_test, y_pred))
 
@@ -349,7 +267,6 @@ def train_final_svm_tfidf(X_train, X_val, X_test, y_train, y_val, y_test):
 
 
 def evaluate_model_on_liar(pipeline, liar_df):
-
     X_liar = liar_df["content"]
     y_liar = liar_df["type"]
 
@@ -364,70 +281,25 @@ def evaluate_model_on_liar(pipeline, liar_df):
     acc = accuracy_score(y_liar, y_pred)
     print("Accuracy:", round(acc, 3))
 
-def train_final_mlp_tfidf(X_train, X_val, X_test, y_train, y_val, y_test):
-    # Build pipeline with best parameters
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            max_features=20000,
-            ngram_range=(1, 2),
-            stop_words=None
-        )),
-        ("clf", MLPClassifier(hidden_layer_sizes=(100,), max_iter=100, random_state=42))
-    ])
+    # ➕ Add confusion matrix
+    cm = confusion_matrix(y_liar, y_pred, labels=["fake", "reliable"])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["fake", "reliable"])
+    disp.plot()
+    plt.savefig("confusion_matrix_LAIR.png", dpi=300, bbox_inches="tight")
 
-    # Fit on full training data
-    pipeline.fit(X_train["content"], y_train)
-
-    # Evaluate on test set
-    y_pred = pipeline.predict(X_test["content"])
-
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    f1 = f1_score(y_test, y_pred, pos_label="fake")
-    print("F1 Score (fake):", round(f1, 3))
-
-    acc = accuracy_score(y_test, y_pred)
-    print("Accuracy:", round(acc, 3))
-
-    return pipeline
-
-
-def train_final_mlp_glove(X_train, X_val, X_test, y_train, y_val, y_test):
-    glove_path = "glove.6B.100d.txt"
-    embeddings_index = load_glove_embeddings(glove_path)
-
-    def embed_df(df):
-        return np.vstack([sentence_to_embedding(row["content"], embeddings_index) for _, row in df.iterrows()])
-
-    X_train_vec = embed_df(X_train)
-    X_val_vec = embed_df(X_val)
-    X_test_vec = embed_df(X_test)
-
-    clf = MLPClassifier(hidden_layer_sizes=(128,), max_iter=200, random_state=42)
-    clf.fit(X_train_vec, y_train)
-
-    y_pred = clf.predict(X_test_vec)
-
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    f1 = f1_score(y_test, y_pred, pos_label="fake")
-    print("F1 Score (fake):", round(f1, 3))
-
-    acc = accuracy_score(y_test, y_pred)
-    print("Accuracy:", round(acc, 3))
-
-    return clf, embeddings_index
-
-def evaluate_mlpmodel_on_liar(model, liar_df, embeddings_index):
-    from embedding import sentence_to_embedding
-    X_liar = np.vstack([sentence_to_embedding(row["content"], embeddings_index) for _, row in liar_df.iterrows()])
+def evaluate_model_on_liar_simple(model, vectorizer, liar_df):
+    # Prepare LIAR data
+    X_liar = liar_df["content"]
     y_liar = liar_df["type"]
 
-    y_pred = model.predict(X_liar)
+    # Transform using the trained vectorizer
+    X_liar_vec = vectorizer.transform(X_liar)
 
-    print("\nPerformance on LIAR Dataset:")
+    # Predict
+    y_pred = model.predict(X_liar_vec)
+
+    # Classification metrics
+    print("\nPerformance on LIAR Dataset (Simple Model):")
     print(classification_report(y_liar, y_pred))
 
     f1 = f1_score(y_liar, y_pred, pos_label="fake")
@@ -435,3 +307,11 @@ def evaluate_mlpmodel_on_liar(model, liar_df, embeddings_index):
 
     acc = accuracy_score(y_liar, y_pred)
     print("Accuracy:", round(acc, 3))
+
+    # Confusion matrix
+    cm = confusion_matrix(y_liar, y_pred, labels=["fake", "reliable"])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["fake", "reliable"])
+    disp.plot()
+    plt.title("Confusion Matrix - Simple Model on LIAR")
+    plt.savefig("confusion_matrix_simple_LIAR.png", dpi=300, bbox_inches="tight")
+    plt.show()

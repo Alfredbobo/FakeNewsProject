@@ -8,8 +8,12 @@ glove.6B.100d.txt
 liar_test.csv
 liar_test_cleaned.csv
 bbc_articles_with_predictions.csv
-test.tsv
-
+TEST.csv
+updated_with_CB_P_clean.csv
+updated_with_CB_P.csv
+liar_train.csv
+merged_cleaned.csv
+liar_train_cleaned.csv
 
 # Ignore Python bytecode
 __pycache__/
