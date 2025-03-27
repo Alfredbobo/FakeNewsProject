@@ -5,6 +5,9 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 import ast
+from urllib.parse import urlparse
+from Model import group_types
+import os
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Helper function to change column names in "bbc_articles_scraped"
@@ -30,6 +33,37 @@ def rename_columns(input_csv, output_csv):
 def save_csv(df, name):
     df.to_csv(f"{name}", index=False)
     print(f"Saved: {name}")
+
+# ----------------------------------------------------------------------------------------------------------
+# *) Helper function to find the domain and change it from bbc.com/.../... to bbc.com.
+# ----------------------------------------------------------------------------------------------------------
+
+def extract_domain(url):
+    try:
+        return urlparse(str(url)).netloc.lower().replace("www.", "")
+    except:
+        return str(url).lower().replace("www.", "")
+    
+# ----------------------------------------------------------------------------------------------------------
+# *) Helper function combine the FakeNewsCorpus with the BBC articles
+# ----------------------------------------------------------------------------------------------------------
+def prepare_combined_dataset(original_csv, bbc_csv, cleaned_csv_name):
+
+    # Step 1: Clean original dataset
+    group_types(original_csv, "updated_cleaned")
+    original_df = pd.read_csv("updated_cleaned.csv")
+
+    # Step 2: Load and fix BBC dataset
+    bbc_df = pd.read_csv(bbc_csv)
+    bbc_df["type"] = "reliable"
+    bbc_df["domain"] = bbc_df["domain"].apply(extract_domain)
+
+    # Step 3: Combine & save
+    combined_df = pd.concat([original_df, bbc_df], ignore_index=True)
+    combined_df.to_csv(cleaned_csv_name, index=False)
+
+    print(f"Combined dataset saved as: {cleaned_csv_name}")
+    return combined_df
 
 
 # ----------------------------------------------------------------------------------------------------------
@@ -247,3 +281,82 @@ def full_cleaning(csv_file, name):
 
 # Test run
 # full_cleaning("news_sample.csv", "TEST.csv")
+
+
+# ----------------------------------------------------------------------------------------------------------
+# *) RUN CLEANING FOR THE LIARDATASET
+# ----------------------------------------------------------------------------------------------------------
+def full_cleaning_liar(csv_file, name):
+    """
+    Loads the CSV, applies all cleaning steps in the following sequence.
+    
+    Steps:
+      1) Part1 cleaning
+      2) Part2 cleaning
+      3) Tokenization
+      4) Stop-word removal & stats
+      5) Stemming & final stats
+    
+    Returns:
+      Cleaned DataFrame
+    """
+    #1) Load CSV
+    df = pd.read_csv(csv_file)
+
+    #2) Part 1 clean
+    df = part1_cleaning(df)
+
+    #3) Part 2 clean
+    df = part2_cleaning(df)
+
+    #4) Tokenization
+    df = tokenize(df)
+
+    #5) Stop-word removal
+    df, stopword_removal = remove_stopwords(df)
+
+    #6) Stemming
+    df = stemming(df, stopword_removal)
+
+    #7) Save cleaned csv
+    folder = "operation_csv_files/"     # cleaned_csv to this folder - (change it if you want to save somewhere else)
+    df.to_csv(folder + name, index=False)
+    print(f"Saved: {name}")
+
+    return df
+
+# ----------------------------------------------------------------------------------------------------------
+# *) LOAD, CHANGE AND CLEAN THE LIAR DATA-SET
+# ----------------------------------------------------------------------------------------------------------
+
+def load_liar_file(file_path="test.tsv"):
+    # Load the LIAR dataset
+    df = pd.read_csv(file_path, sep="\t", header=None)
+    df.columns = [
+        "id", "label", "statement", "subject", "speaker", "job_title", "state", "party",
+        "barely_true", "false", "half_true", "mostly_true", "pants_fire", "context"
+    ]
+
+    label_map = {
+        "true": "reliable",
+        "mostly-true": "reliable",
+        "false": "fake",
+        "pants-fire": "fake",
+        "barely-true": "fake"
+    }
+
+    df = df[df["label"].isin(label_map)]
+    df["type"] = df["label"].map(label_map)
+    df_clean = df[["statement", "type"]].rename(columns={"statement": "content"})
+
+    # Add the correct directory
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    raw_csv = f"liar_{base_name}.csv"
+    cleaned_csv = f"liar_{base_name}_cleaned.csv"
+
+    df_clean.to_csv(raw_csv, index=False)
+    full_cleaning_liar(raw_csv, cleaned_csv)
+
+    # 🛠 Fix: Read from correct folder
+    return pd.read_csv("operation_csv_files/" + cleaned_csv)
+
