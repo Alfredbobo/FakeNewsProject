@@ -13,8 +13,14 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.sparse import hstack
+<<<<<<< HEAD
 import numpy as np
 import os
+=======
+from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+>>>>>>> 1512d71cc20e5606f361265f5d8dd7e5c67f6765
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Grouping Types (['types'] --> reliable or fake)
