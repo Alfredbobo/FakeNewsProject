@@ -6,6 +6,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 from sklearn.preprocessing import OneHotEncoder
 from scipy.sparse import hstack
+from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------
 # *) Grouping Types (['types'] --> reliable or fake)
@@ -16,7 +19,8 @@ returns: CSV with only 2 types of ['type'] = ['reliable'] or ['fake']
 """
 def group_types(csv, name):
     df = pd.read_csv(csv)
-    fake_types = ['conspiracy', 'unreliable', 'junksci', 'clickbait']
+    fake_types = ['conspiracy', 'unreliable', 'junksci', 'clickbait', 'hate']
+    reliable_types = ['political']
     rows_to_drop = []
 
     # Iterate over rows and update the ['type'] column:
@@ -26,6 +30,8 @@ def group_types(csv, name):
             continue
         elif current in fake_types:
             df.loc[index, 'type'] = 'fake'
+        elif current in reliable_types:
+            df.loc[index, 'type'] = 'reliable'
         else:
             rows_to_drop.append(index) 
     # Remove all other rows that isn't [reliable] or in 'fake_types'

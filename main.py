@@ -19,8 +19,8 @@ from Model import *
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model
 #-----------------------------------------------------------------------------------------------------------------
-#X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
-#train_model(X_train, X_val, X_test, y_train, y_val, y_test)
+X_train, X_val, X_test, y_train, y_val, y_test = split_data("updated.csv")
+train_model(X_train, X_val, X_test, y_train, y_val, y_test)
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model WITH METADATA (url)
