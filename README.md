@@ -51,5 +51,33 @@ Set one of the following flags to `True` in `main.py` to run a specific model or
 3. This will generate `updated.csv` — the standard input for all models.
 4. Open `main.py`, set the desired flag to `True`, and run:
 
+---
+
+## 🧪 Results
+
+Results are displayed and stored in multiple ways:
+
+- 📄 **Console Output**:
+  - Classification Report (precision, recall, f1-score)
+  - Accuracy and macro/weighted averages
+  - F1-score for the fake class
+
+- 📊 **Visuals**:
+  - Confusion matrices are saved automatically as `.png` files.
+  - A bar chart for cross-domain accuracy and F1-scores can be created via LaTeX or Python.
+
+---
+
+## 🧠 Project Team – ML-BOLD
+
+| Name                           | Alias   |
+|--------------------------------|---------|
+| Jon Broby Tinghuus Petersen    | `jbm823` |
+| Alfred Tolstrup                | `zmv455` |
+| August Bromann                | `cdz558` |
+| Nikolai Lysholdt Petersen      | `mqh859` |
+
+---
+
 ```bash
 python main.py
