@@ -2,21 +2,39 @@ from CleanData import *
 from Model import *
 import os
 import gc
-T=True
-F=False
+
+# ============================================================
+# MODEL SELECTION CONFIGURATION
+# Toggle which models to run by setting the flags below to True or False
+# ============================================================
+
+# Simple logistic regression model
+RUN_SIMPLE_MODEL = False
+
+# Simple model + metadata (URL.)
+RUN_SIMPLE_MODEL_WITH_METADATA = False
+
+# Combine FakeNewsCorpus with BBC articles
+# !!! This will overwrite 'updated.csv' — back up if needed!!!
+COMBINE_FAKENEWSCORPUS_WITH_BBC = False
+
+# Simple model + metadata + BBC articles
+RUN_SIMPLE_MODEL_WITH_METADATA_AND_BBC = False
+
+# Simple model evaluated on LIAR dataset (No metadata)
+RUN_SIMPLE_MODEL_AND_EVALUATE_ON_LIAR = False
+
+# Advanced model (SVM + TF-IDF) (No metadata)
+RUN_ADVANCED_MODEL = False
+
+# Advanced model evaluated on LIAR dataset (No metadata)
+RUN_ADVANCED_MODEL_AND_EVALUATE_ON_LIAR = False
 
 
-RUN_SIMPLE_MODEL = F
-RUN_SIMPLE_MODEL_AND_EVALUATE_ON_LIAR = F
-RUN_ADVANCED_MODEL = F
-RUN_ADVANCED_MODEL_AND_EVALUATE_ON_LIAR = F
 
-COMBINE_FAKENEWSCORPUS_WITH_BBC = F #MAKE SURE TO MAKE A COPY OF UPDATED IF YOU WANT TO RUN ON THE DATA WITHOUT THE BBC FILES (THIS OVERWRITES THE CURRENT "updated.CSV")
 
-#-----------------------------------------------------------------------------------------------------------------
-# RUN 'GROUP_TYPES' for binary classification
-#-----------------------------------------------------------------------------------------------------------------
-#group_types("merged_cleaned.csv", "updated.csv")
+
+#INPUTFILES CAN BE CHANGED IN THE CODE BELOW"
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model
@@ -29,8 +47,10 @@ if RUN_SIMPLE_MODEL:
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model WITH METADATA (url)
 #-----------------------------------------------------------------------------------------------------------------
-#X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-#train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
+if RUN_SIMPLE_MODEL_WITH_METADATA:
+    print("Running Simple Model with METADATA...")
+    X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
+    train_with_meta(X_train, X_val, X_test, y_train, y_val, y_test)
 
 #-----------------------------------------------------------------------------------------------------------------
 # COMBINE FAKENEWSCORPUS WITH BBC:
@@ -44,8 +64,10 @@ if COMBINE_FAKENEWSCORPUS_WITH_BBC:
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model WITH METADATA AND BBC ARTICLES 
 #-----------------------------------------------------------------------------------------------------------------
-X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
-train_with_meta_and_extra_data(X_train, X_val, X_test, y_train, y_val, y_test)
+if RUN_SIMPLE_MODEL_WITH_METADATA_AND_BBC:
+    print("Running Simple Model with METADAT & BBC...")
+    X_train, X_val, X_test, y_train, y_val, y_test = split_with_meta("updated.csv")
+    train_with_meta_and_extra_data(X_train, X_val, X_test, y_train, y_val, y_test)
 
 #-----------------------------------------------------------------------------------------------------------------
 # RUN 'SPLIT_DATA' & Train Model SIMPLE MODEL & EVALUATE ON LIAR DATASET
@@ -75,5 +97,3 @@ if RUN_ADVANCED_MODEL_AND_EVALUATE_ON_LIAR:
     liar_df = load_liar_file("train.tsv")
     evaluate_model_on_liar(pipeline, liar_df)
 
-
-liar_df = load_liar_file("test.tsv")
