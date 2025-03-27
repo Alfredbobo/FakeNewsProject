@@ -6,10 +6,11 @@ Group: ML BOLD *(Alfred, Jon, August, Nikolai)*
 ### HOW TO RUN:
 
 1. **Download the project** and open a terminal in the folder.
-2. **Activate your Python environment** if needed.
-3. To run operations or evaluations, open `main.py` and set the corresponding model flags (e.g. `RUN_SIMPLE_MODEL = True`).
-4. Only **one flag should be set to `True` at a time** due to dataset splitting.
-5. Run the script with:
+2. **Download "Dataset"** from the feature and add the file **"updated.csv"** and **"test.tsv"** to the project folder. If you want to try to clean the data yourself Download the original [995,000_rows.csv](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
+3. **Activate your Python environment** if needed.
+4. To run operations or evaluations, open `main.py` and set the corresponding model flags (e.g. `RUN_SIMPLE_MODEL = True`).
+5. Only **one flag should be set to `True` at a time** due to dataset splitting.
+6. Run the script with:
 
 ---
 
