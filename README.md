@@ -8,12 +8,11 @@
 1.  **Download the project** and open a terminal in the project folder.
 2.  **Download the dataset files**:  
    - Add both `updated.csv` and `test.tsv` to the root of the project.  
-   - *Want to preprocess it yourself?* Download the original  
-     👉 [`995,000_rows.csv`](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
+   - Want to clean the data yourself? Download the original 👉 [`995,000_rows.csv`](https://absalon.ku.dk/courses/80486/files/9275000/download?download_frd=1)
 3.   Activate your Python environment (if needed).
 4.  Open `main.py` and set the model you want to run by changing its flag to `True`  
    _(e.g. `RUN_SIMPLE_MODEL = True`)_ ⚠️ **Only one flag should be `True` at a time** due to dataset splitting!
-6. ▶️ Run the script:
+6. Run the script:
 
 ---
 
@@ -67,7 +66,7 @@ Results are displayed and stored in multiple ways:
 
 - 📊 **Visuals**:
   - Confusion matrices are saved automatically as `.png` files.
-  - A bar chart for cross-domain accuracy and F1-scores can be created via LaTeX or Python.
+  - A bar chart for cross-domain accuracy and F1-scores can be viewd in the LaTeX file.
 
 ---
 
